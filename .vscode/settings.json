@@ -8,7 +8,12 @@
     88
   ],
   "editor.wordWrap": "wordWrapColumn",
-  "editor.wordWrapColumn": 88
+  "editor.wordWrapColumn": 88,
+  "python.testing.pytestArgs": [
+    "tests"
+  ],
+  "python.testing.unittestEnabled": false,
+  "python.testing.pytestEnabled": true
 }
 // This file is used to configure VS Code settings for Python development
 // It specifies that the Black formatter should be used and enables format on save
