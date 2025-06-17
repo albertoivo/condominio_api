@@ -1,3 +1,11 @@
+import os
+import sys
+from pathlib import Path
+
+# Adicionar o diretório raiz ao Python path ANTES dos imports
+root_dir = Path(__file__).parent.parent
+sys.path.insert(0, str(root_dir))
+
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
