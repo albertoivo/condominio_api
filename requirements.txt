@@ -6,3 +6,8 @@ alembic
 python-dotenv
 PyJWT
 passlib[bcrypt]
+black
+flake8
+autoflake8
+pytest
+pytest-asyncio
