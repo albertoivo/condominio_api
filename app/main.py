@@ -1,9 +1,9 @@
+import os
 from fastapi import FastAPI, Depends
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from app.database import get_db
 from app.routers import users, condominios
-import os
 from dotenv import load_dotenv
 
 load_dotenv()
