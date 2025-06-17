@@ -35,4 +35,5 @@ jobs:
 
       - name: Rodar testes (pytest)
         run: |
-          pytest
+          cd ${{ github.workspace }}
+          python -m pytest tests/ -v
