@@ -3,7 +3,12 @@
   "editor.formatOnSave": true,
   "editor.codeActionsOnSave": {
     "source.fixAll": true
-  }
+  },
+  "editor.rulers": [
+    79
+  ],
+  "editor.wordWrap": "wordWrapColumn",
+  "editor.wordWrapColumn": 79
 }
 // This file is used to configure VS Code settings for Python development
 // It specifies that the Black formatter should be used and enables format on save
