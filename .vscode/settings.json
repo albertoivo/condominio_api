@@ -5,10 +5,10 @@
     "source.fixAll": true
   },
   "editor.rulers": [
-    79
+    88
   ],
   "editor.wordWrap": "wordWrapColumn",
-  "editor.wordWrapColumn": 79
+  "editor.wordWrapColumn": 88
 }
 // This file is used to configure VS Code settings for Python development
 // It specifies that the Black formatter should be used and enables format on save
