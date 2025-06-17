@@ -1,5 +1,6 @@
-from pydantic import BaseModel, ConfigDict
 from typing import Optional
+
+from pydantic import BaseModel, ConfigDict
 
 
 class CondominioBase(BaseModel):
@@ -16,5 +17,5 @@ class CondominioUpdate(BaseModel):
 
 class Condominio(CondominioBase):
     model_config = ConfigDict(from_attributes=True)
-    
+
     id: int

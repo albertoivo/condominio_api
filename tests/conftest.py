@@ -1,13 +1,15 @@
-import sys
 import os
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+import sys
 
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+
+from app.database import Base, get_db
 from app.main import app
-from app.database import get_db, Base
+
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # Banco de dados em memória para testes
 SQLALCHEMY_DATABASE_URL = "sqlite:///./test.db"
@@ -32,14 +34,14 @@ def client():
     """Fixture do cliente de teste FastAPI"""
     # Criar tabelas
     Base.metadata.create_all(bind=engine)
-    
+
     # Override da dependência do banco
     app.dependency_overrides[get_db] = override_get_db
-    
+
     # Cliente de teste
     with TestClient(app) as test_client:
         yield test_client
-    
+
     # Limpar depois dos testes
     Base.metadata.drop_all(bind=engine)
     app.dependency_overrides.clear()

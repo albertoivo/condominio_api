@@ -1,9 +1,11 @@
+from typing import List
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+
 from app.database import get_db
-from app.services.condominio_service import CondominioService
 from app.schemas.condominio import Condominio, CondominioCreate
-from typing import List
+from app.services.condominio_service import CondominioService
 
 router = APIRouter(
     prefix="/condominios",

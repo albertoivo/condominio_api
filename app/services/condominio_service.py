@@ -1,7 +1,9 @@
+from typing import List, Optional
+
 from sqlalchemy.orm import Session
+
 from app.models.condominio import Condominio
 from app.schemas.condominio import CondominioCreate, CondominioUpdate
-from typing import List, Optional
 
 
 class CondominioService:

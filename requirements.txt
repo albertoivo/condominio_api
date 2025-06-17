@@ -12,3 +12,4 @@ autoflake8
 pytest
 pytest-asyncio
 httpx
+isort

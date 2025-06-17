@@ -1,6 +1,7 @@
-from sqlalchemy import Column, Integer, String
-from .base import Base
 from pydantic import BaseModel, ConfigDict
+from sqlalchemy import Column, Integer, String
+
+from .base import Base
 
 
 class Condominio(Base):
