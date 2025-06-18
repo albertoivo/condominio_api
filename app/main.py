@@ -6,7 +6,7 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.routers import condominios, users
+from app.routers import condominios, users, auth
 
 load_dotenv()
 
@@ -21,6 +21,7 @@ app = FastAPI(
 # Incluir routers
 app.include_router(users.router)
 app.include_router(condominios.router)
+app.include_router(auth.router)
 
 
 @app.get("/", tags=["Root"])
