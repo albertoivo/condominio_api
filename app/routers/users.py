@@ -5,18 +5,34 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.schemas.user import User, UserCreate, UserUpdate
+from app.services.auth_service import AuthService
 from app.services.user_service import UserService
 
 router = APIRouter(prefix="/users", tags=["Users"])
 
 
+@router.get("/me", response_model=User, tags=["Users"], summary="Usuário Logado")
+def logged_user(
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(AuthService.get_current_user),
+):
+    """
+    Dependency to get the currently logged-in user.
+    """
+    return current_user
+
+
 @router.get("/", response_model=List[User], tags=["Users"], summary="Listar Usuários")
-def get_users(db: Session = Depends(get_db)):
+def get_users(
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(AuthService.verify_admin),
+):
     """
     Retorna a lista de todos os usuários cadastrados.
 
     Args:
         db (Session): Sessão do banco de dados injetada via dependency injection
+        current_user (dict): Dados do usuário atual (injetado automaticamente)
 
     Returns:
         List[User]: Lista com todos os usuários encontrados no banco de dados

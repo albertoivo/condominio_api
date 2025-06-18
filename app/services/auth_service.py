@@ -3,14 +3,18 @@ from datetime import datetime, timedelta, timezone
 from typing import Optional
 
 import jwt
+from fastapi import Depends, HTTPException, status
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from passlib.context import CryptContext
 from sqlalchemy.orm import Session
 
 from app.models.user import User
 
+security = HTTPBearer()
+
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 SECRET_KEY = os.getenv("SECRET_KEY", "secret")
-ALGORITHM = "HS256"
+ALGORITHM = os.getenv("ALGORITHM", "HS256")
 ACCESS_TOKEN_EXPIRE_MINUTES = 60
 
 
@@ -36,6 +40,7 @@ class AuthService:
         return self.create_access_token(
             {
                 "sub": str(user.id),
+                "id": user.id,
                 "email": user.email,
                 "nome": user.nome,
                 "role": user.role,
@@ -54,3 +59,44 @@ class AuthService:
         to_encode.update({"iat": iat})
 
         return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+
+    def verify_token(credentials: HTTPAuthorizationCredentials = Depends(security)):
+        """
+        Verifica e decodifica o JWT token
+        """
+        try:
+            # O token já vem sem "Bearer " quando usa HTTPBearer
+            payload = jwt.decode(
+                credentials.credentials, SECRET_KEY, algorithms=[ALGORITHM]
+            )
+            user_id = payload.get("sub")
+            if user_id is None:
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Token inválido",
+                    headers={"WWW-Authenticate": "Bearer"},
+                )
+            return payload
+        except jwt.PyJWTError:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Token inválido",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+
+    def get_current_user(token_data: dict = Depends(verify_token)):
+        """
+        Retorna dados do usuário atual baseado no token
+        """
+        return token_data
+
+    def verify_admin(token_data: dict = Depends(verify_token)):
+        """
+        Verifica se o usuário tem role de admin
+        """
+        if token_data.get("role") != "admin":
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Acesso negado: privilégios de admin necessários",
+            )
+        return token_data
