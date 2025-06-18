@@ -18,16 +18,25 @@ class UserService:
     def get_user_by_id(self, user_id: int) -> Optional[User]:
         return self.db.query(User).filter(User.id == user_id).first()
 
+    def get_user_by_email(self, email: str) -> Optional[User]:
+        return self.db.query(User).filter(User.email == email).first()
+
     def create_user(self, user_data: UserCreate) -> User:
+        if self.get_user_by_email(user_data.email):
+            raise ValueError("Email já está em uso")
+
         hashed_password = self.auth_service.get_password_hash(user_data.password)
+
         db_user = User(
-            nome=user_data.name,
+            nome=user_data.nome,
             email=user_data.email,
             hashed_password=hashed_password,
         )
+
         self.db.add(db_user)
         self.db.commit()
         self.db.refresh(db_user)
+
         return db_user
 
     def delete_user(self, user_id: int) -> bool:
@@ -43,9 +52,15 @@ class UserService:
         if not user:
             return None
 
+        # Verificar se está tentando atualizar email para um já existente
+        if user_data.email and user_data.email != user.email:
+            existing_user = self.get_user_by_email(user_data.email)
+            if existing_user:
+                raise ValueError("Email já está em uso")
+
         update_data = user_data.dict(exclude_unset=True)
-        if "name" in update_data:
-            user.nome = update_data["name"]
+        if "nome" in update_data:
+            user.nome = update_data["nome"]
         if "email" in update_data:
             user.email = update_data["email"]
         if "password" in update_data:

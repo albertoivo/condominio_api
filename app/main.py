@@ -6,7 +6,7 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.routers import condominios, users, auth
+from app.routers import auth, condominios, users
 
 load_dotenv()
 

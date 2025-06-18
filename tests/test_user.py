@@ -7,7 +7,7 @@ from app.services.user_service import UserService
 def test_login_success(client: TestClient, db_session):
     service = UserService(db_session)
     service.create_user(
-        UserCreate(name="John", email="john@example.com", password="secret")
+        UserCreate(nome="John", email="john@example.com", password="secret")
     )
 
     response = client.post(

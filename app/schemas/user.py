@@ -4,7 +4,7 @@ from pydantic import BaseModel, ConfigDict
 
 
 class UserBase(BaseModel):
-    name: str
+    nome: str
     email: str
 
 
@@ -13,7 +13,7 @@ class UserCreate(UserBase):
 
 
 class UserUpdate(BaseModel):
-    name: Optional[str] = None
+    nome: Optional[str] = None
     email: Optional[str] = None
     password: Optional[str] = None
 
