@@ -31,6 +31,7 @@ class UserService:
             nome=user_data.nome,
             email=user_data.email,
             hashed_password=hashed_password,
+            role=user_data.role or "user",
         )
 
         self.db.add(db_user)
@@ -52,21 +53,27 @@ class UserService:
         if not user:
             return None
 
+        # Validar role
+        if user_data.role and user_data.role not in ["user", "admin"]:
+            raise ValueError("Role inválida. Deve ser 'user' ou 'admin'.")
+
         # Verificar se está tentando atualizar email para um já existente
         if user_data.email and user_data.email != user.email:
             existing_user = self.get_user_by_email(user_data.email)
             if existing_user:
                 raise ValueError("Email já está em uso")
 
-        update_data = user_data.dict(exclude_unset=True)
-        if "nome" in update_data:
-            user.nome = update_data["nome"]
-        if "email" in update_data:
-            user.email = update_data["email"]
-        if "password" in update_data:
-            user.hashed_password = self.auth_service.get_password_hash(
-                update_data["password"]
-            )
+        # Pegar apenas campos que foram fornecidos (não None)
+        update_data = user_data.model_dump(exclude_unset=True)
+
+        # Atualizar campos fornecidos
+        for field, value in update_data.items():
+            if field == "password":
+                # Hash da senha se fornecida
+                user.hashed_password = self.auth_service.get_password_hash(value)
+            elif hasattr(user, field):
+                # Atualizar outros campos diretamente
+                setattr(user, field, value)
 
         self.db.commit()
         self.db.refresh(user)

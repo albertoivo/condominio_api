@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.schemas.user import User, UserCreate
+from app.schemas.user import User, UserCreate, UserUpdate
 from app.services.user_service import UserService
 
 router = APIRouter(prefix="/users", tags=["Users"])
@@ -102,13 +102,13 @@ def delete_user(user_id: int, db: Session = Depends(get_db)):
 @router.put(
     "/{user_id}", response_model=User, tags=["Users"], summary="Atualizar Usuário"
 )
-def update_user(user_id: int, user_data: UserCreate, db: Session = Depends(get_db)):
+def update_user(user_id: int, user_data: UserUpdate, db: Session = Depends(get_db)):
     """
     Atualiza os dados de um usuário existente.
 
     Args:
         user_id (int): ID único do usuário a ser atualizado
-        user_data (UserCreate): Dados atualizados do usuário
+        user_data (UserUpdate): Dados atualizados do usuário
         db (Session): Sessão do banco de dados injetada via dependency injection
 
     Returns:

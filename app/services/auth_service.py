@@ -34,7 +34,12 @@ class AuthService:
             return None
 
         return self.create_access_token(
-            {"sub": str(user.id), "email": user.email, "nome": user.nome}
+            {
+                "sub": str(user.id),
+                "email": user.email,
+                "nome": user.nome,
+                "role": user.role,
+            }
         )
 
     def create_access_token(
@@ -44,5 +49,8 @@ class AuthService:
         expire = datetime.now(timezone.utc) + (
             expires_delta or timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
         )
+        iat = datetime.now(timezone.utc)
         to_encode.update({"exp": expire})
+        to_encode.update({"iat": iat})
+
         return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)

@@ -9,16 +9,21 @@ class UserBase(BaseModel):
 
 
 class UserCreate(UserBase):
+    nome: str
+    email: str
     password: str
+    role: Optional[str] = "user"
 
 
 class UserUpdate(BaseModel):
     nome: Optional[str] = None
     email: Optional[str] = None
     password: Optional[str] = None
+    role: Optional[str] = None
 
 
 class User(UserBase):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
+    role: str = "user"
