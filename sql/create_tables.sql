@@ -1,3 +1,5 @@
+-- Código para rodar apenas em PostgreSQL
+
 ----------
 -- user --
 ----------
@@ -22,7 +24,6 @@ INSERT INTO users (nome, email, hashed_password, role) VALUES
     ('João Silva', 'joao@email.com', '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBcPkKyJTzLlP6', 'user'),
     ('Maria Santos', 'maria@email.com', '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBcPkKyJTzLlP6', 'admin'),
     ('Pedro Oliveira', 'pedro@email.com', '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBcPkKyJTzLlP6', 'user');
-
 
 ----------------
 -- CONDOMINIO --
