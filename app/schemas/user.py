@@ -9,12 +9,13 @@ class UserBase(BaseModel):
 
 
 class UserCreate(UserBase):
-    pass
+    password: str
 
 
 class UserUpdate(BaseModel):
     name: Optional[str] = None
     email: Optional[str] = None
+    password: Optional[str] = None
 
 
 class User(UserBase):

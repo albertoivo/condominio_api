@@ -4,11 +4,13 @@ from sqlalchemy.orm import Session
 
 from app.models.user import User
 from app.schemas.user import UserCreate, UserUpdate
+from app.services.auth_service import AuthService
 
 
 class UserService:
     def __init__(self, db: Session):
         self.db = db
+        self.auth_service = AuthService(db)
 
     def get_users(self) -> List[User]:
         return self.db.query(User).all()
@@ -17,7 +19,12 @@ class UserService:
         return self.db.query(User).filter(User.id == user_id).first()
 
     def create_user(self, user_data: UserCreate) -> User:
-        db_user = User(**user_data.dict())
+        hashed_password = self.auth_service.get_password_hash(user_data.password)
+        db_user = User(
+            nome=user_data.name,
+            email=user_data.email,
+            hashed_password=hashed_password,
+        )
         self.db.add(db_user)
         self.db.commit()
         self.db.refresh(db_user)
@@ -36,8 +43,15 @@ class UserService:
         if not user:
             return None
 
-        for key, value in user_data.dict(exclude_unset=True).items():
-            setattr(user, key, value)
+        update_data = user_data.dict(exclude_unset=True)
+        if "name" in update_data:
+            user.nome = update_data["name"]
+        if "email" in update_data:
+            user.email = update_data["email"]
+        if "password" in update_data:
+            user.hashed_password = self.auth_service.get_password_hash(
+                update_data["password"]
+            )
 
         self.db.commit()
         self.db.refresh(user)
