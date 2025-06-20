@@ -32,4 +32,4 @@ def logout(current_user: User = Depends(get_current_user)):
     embora não invalide o token diretamente. Para invalidar o token, seria
     necessário implementar uma blocklist.
     """
-    return {"message": "Logout realizado com sucesso."}
+    return {"detail": "Logout realizado com sucesso."}
