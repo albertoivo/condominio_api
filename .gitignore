@@ -194,3 +194,4 @@ cython_debug/
 .cursorindexingignore
 format.sh
 .pre-commit-config.yaml
+test.db
