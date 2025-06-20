@@ -110,7 +110,7 @@ def delete_user(user_id: int, db: Session = Depends(get_db)):
     """
     user_service = UserService(db)
     if user_service.delete_user(user_id):
-        return {"message": "Usuário removido com sucesso"}
+        return {"detail": "Usuário removido com sucesso"}
     else:
         raise HTTPException(status_code=404, detail="Usuário não encontrado")
 
