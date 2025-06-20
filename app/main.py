@@ -6,21 +6,20 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.routers import auth, condominios, users
+from app.routers import auth, users
 
 load_dotenv()
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 
 app = FastAPI(
-    title="Condominio API",
-    description="API para gerenciamento de condomínio",
+    title="CRUD OAuth API",
+    description="API para templates de CRUD com autenticação OAuth2",
     version="1.0.0",
 )
 
 # Incluir routers
 app.include_router(users.router)
-app.include_router(condominios.router)
 app.include_router(auth.router)
 
 
