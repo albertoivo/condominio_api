@@ -11,7 +11,7 @@ from app.services.user_service import UserService
 router = APIRouter(prefix="/users", tags=["Users"])
 
 
-@router.get("/me", response_model=User, tags=["Users"], summary="Usuário Logado")
+@router.get("/me", response_model=User, summary="Usuário Logado")
 def logged_user(
     db: Session = Depends(get_db),
     current_user: dict = Depends(AuthService.get_current_user),
@@ -22,7 +22,7 @@ def logged_user(
     return current_user
 
 
-@router.get("/", response_model=List[User], tags=["Users"], summary="Listar Usuários")
+@router.get("/", response_model=List[User], summary="Listar Usuários")
 def get_users(
     db: Session = Depends(get_db),
     current_user: dict = Depends(AuthService.verify_admin),
@@ -45,7 +45,7 @@ def get_users(
 
 
 @router.post(
-    "/", response_model=User, status_code=201, tags=["Users"], summary="Criar Usuário"
+    "/", response_model=User, status_code=201, summary="Criar Usuário"
 )
 def create_user(user_data: UserCreate, db: Session = Depends(get_db)):
     """
@@ -70,7 +70,7 @@ def create_user(user_data: UserCreate, db: Session = Depends(get_db)):
 
 
 @router.get(
-    "/{user_id}", response_model=User, tags=["Users"], summary="Buscar Usuário por ID"
+    "/{user_id}", response_model=User, summary="Buscar Usuário por ID"
 )
 def get_user(user_id: int, db: Session = Depends(get_db)):
     """
@@ -116,7 +116,7 @@ def delete_user(user_id: int, db: Session = Depends(get_db)):
 
 
 @router.put(
-    "/{user_id}", response_model=User, tags=["Users"], summary="Atualizar Usuário"
+    "/{user_id}", response_model=User, summary="Atualizar Usuário"
 )
 def update_user(user_id: int, user_data: UserUpdate, db: Session = Depends(get_db)):
     """
