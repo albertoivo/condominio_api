@@ -9,7 +9,7 @@ def test_create_user(client: TestClient, db_session):
     data = service.create_user(
         UserCreate(nome="Jane", email="jane@example.com", password="secret")
     )
-    
+
     assert data.nome == "Jane"
     assert data.email == "jane@example.com"
 
