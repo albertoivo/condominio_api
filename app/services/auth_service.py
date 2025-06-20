@@ -2,17 +2,16 @@ import os
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 
+import bcrypt
 import jwt
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from passlib.context import CryptContext
 from sqlalchemy.orm import Session
 
 from app.models.user import User
 
 security = HTTPBearer()
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 SECRET_KEY = os.getenv("SECRET_KEY", "secret")
 ALGORITHM = os.getenv("ALGORITHM", "HS256")
 ACCESS_TOKEN_EXPIRE_MINUTES = 60
@@ -23,10 +22,13 @@ class AuthService:
         self.db = db
 
     def verify_password(self, plain_password: str, hashed_password: str) -> bool:
-        return pwd_context.verify(plain_password, hashed_password)
+        return bcrypt.checkpw(
+            plain_password.encode("utf-8"), hashed_password.encode("utf-8")
+        )
 
     def get_password_hash(self, password: str) -> str:
-        return pwd_context.hash(password)
+        hashed_bytes = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
+        return hashed_bytes.decode("utf-8")
 
     def authenticate_user(self, email: str, password: str) -> Optional[str]:
         user = self.db.query(User).filter(User.email == email).first()
