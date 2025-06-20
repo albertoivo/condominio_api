@@ -28,8 +28,8 @@ def logout(current_user: User = Depends(AuthService.get_current_user)):
     Em uma implementação stateless com JWT, o logout é primariamente uma
     operação do lado do cliente, que consiste em descartar o token.
 
-    Este endpoint serve como um ponto de finalização formal da sessão no lado do servidor,
-    embora não invalide o token diretamente. Para invalidar o token, seria
+    Este endpoint serve como um ponto de finalização formal da sessão no lado do
+    servidor, embora não invalide o token diretamente. Para invalidar o token, seria
     necessário implementar uma blocklist.
     """
     return {"detail": "Logout realizado com sucesso."}
