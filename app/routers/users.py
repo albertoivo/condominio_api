@@ -44,9 +44,7 @@ def get_users(
     return user_service.get_users()
 
 
-@router.post(
-    "/", response_model=User, status_code=201, summary="Criar Usuário"
-)
+@router.post("/", response_model=User, status_code=201, summary="Criar Usuário")
 def create_user(user_data: UserCreate, db: Session = Depends(get_db)):
     """
     Cria um novo usuário no sistema.
@@ -69,9 +67,7 @@ def create_user(user_data: UserCreate, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.get(
-    "/{user_id}", response_model=User, summary="Buscar Usuário por ID"
-)
+@router.get("/{user_id}", response_model=User, summary="Buscar Usuário por ID")
 def get_user(user_id: int, db: Session = Depends(get_db)):
     """
     Busca um usuário específico pelo ID.
@@ -115,10 +111,13 @@ def delete_user(user_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Usuário não encontrado")
 
 
-@router.put(
-    "/{user_id}", response_model=User, summary="Atualizar Usuário"
-)
-def update_user(user_id: int, user_data: UserUpdate, db: Session = Depends(get_db)):
+@router.put("/{user_id}", response_model=User, summary="Atualizar Usuário")
+def update_user(
+    user_id: int,
+    user_data: UserUpdate,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(AuthService.get_current_user),
+):
     """
     Atualiza os dados de um usuário existente.
 
@@ -133,8 +132,11 @@ def update_user(user_id: int, user_data: UserUpdate, db: Session = Depends(get_d
     Raises:
         HTTPException: 404 - Se o usuário não for encontrado
                        400 - Se houver erro na validação dos dados
+                       403 - Se o usuário atual não tiver permissão para atualizar
     """
     user_service = UserService(db)
+    if current_user["id"] != user_id:
+        raise HTTPException(status_code=403, detail="Acesso negado")
     updated_user = user_service.update_user(user_id, user_data)
     if not updated_user:
         raise HTTPException(status_code=404, detail="Usuário não encontrado")

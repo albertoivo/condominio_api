@@ -134,3 +134,111 @@ def test_delete_user_as_common_user_fails(
     admin_user_id = users_in_db[0]["id"]
     response = client.delete(f"/users/{admin_user_id}", headers=user_auth_headers)
     assert response.status_code == 200  # 403 Forbidden
+
+
+def test_update_own_user_successfully(
+    client: TestClient, user_auth_headers, users_in_db
+):
+    """Testa se um usuário consegue atualizar seus próprios dados."""
+    common_user = users_in_db[1]
+    user_id = common_user["id"]
+    update_data = {"nome": "Common User Updated"}
+
+    response = client.put(
+        f"/users/{user_id}", json=update_data, headers=user_auth_headers
+    )
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["nome"] == "Common User Updated"
+    assert data["email"] == common_user["email"]  # O email não deve mudar
+
+
+def test_update_other_user_fails(client: TestClient, user_auth_headers, users_in_db):
+    """Testa se um usuário comum não consegue atualizar os dados de outro usuário."""
+    admin_user_id = users_in_db[0]["id"]
+    update_data = {"nome": "Attempted Update"}
+
+    response = client.put(
+        f"/users/{admin_user_id}", json=update_data, headers=user_auth_headers
+    )
+
+    assert response.status_code == 403
+    assert response.json()["detail"] == "Acesso negado"
+
+
+def test_update_user_unauthenticated_fails(client: TestClient, users_in_db):
+    """Testa se a atualização de usuário falha sem autenticação."""
+    user_id = users_in_db[1]["id"]
+    update_data = {"nome": "Unauthenticated Update"}
+
+    response = client.put(f"/users/{user_id}", json=update_data)
+    assert response.status_code == 403
+
+
+def test_update_user_empty_name_fails(
+    client: TestClient, user_auth_headers, users_in_db
+):
+    """Testa se a atualização falha com nome vazio."""
+    user_id = users_in_db[1]["id"]
+    update_data = {"nome": ""}  # Nome vazio
+
+    response = client.put(
+        f"/users/{user_id}", json=update_data, headers=user_auth_headers
+    )
+
+    assert response.status_code == 422  # 422 Unprocessable Entity
+    errors = response.json()["detail"]
+    # Verifica se há erro relacionado ao campo nome
+    assert any("nome" in error["loc"] for error in errors)
+
+
+def test_update_user_invalid_email_fails(
+    client: TestClient, user_auth_headers, users_in_db
+):
+    """Testa se a atualização falha com email inválido."""
+    user_id = users_in_db[1]["id"]
+    update_data = {"email": "invalid-email"}  # Email sem formato válido
+
+    response = client.put(
+        f"/users/{user_id}", json=update_data, headers=user_auth_headers
+    )
+
+    assert response.status_code == 422  # 422 Unprocessable Entity
+    errors = response.json()["detail"]
+    # Verifica se há erro relacionado ao campo email
+    assert any("email" in error["loc"] for error in errors)
+
+
+def test_update_user_short_password_fails(
+    client: TestClient, user_auth_headers, users_in_db
+):
+    """Testa se a atualização falha com senha muito curta."""
+    user_id = users_in_db[1]["id"]
+    update_data = {"password": "123"}  # Senha muito curta (menos de 6 caracteres)
+
+    response = client.put(
+        f"/users/{user_id}", json=update_data, headers=user_auth_headers
+    )
+
+    assert response.status_code == 422  # 422 Unprocessable Entity
+    errors = response.json()["detail"]
+    # Verifica se há erro relacionado ao campo password
+    assert any("password" in error["loc"] for error in errors)
+
+
+def test_update_user_invalid_role_fails(
+    client: TestClient, user_auth_headers, users_in_db
+):
+    """Testa se a atualização falha com role inválida."""
+    user_id = users_in_db[1]["id"]
+    update_data = {"role": "invalid_role"}  # Role que não é 'user' nem 'admin'
+
+    response = client.put(
+        f"/users/{user_id}", json=update_data, headers=user_auth_headers
+    )
+
+    assert response.status_code == 422  # 422 Unprocessable Entity
+    errors = response.json()["detail"]
+    # Verifica se há erro relacionado ao campo role
+    assert any("role" in error["loc"] for error in errors)
