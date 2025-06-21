@@ -1,7 +1,9 @@
 fastapi
+slowapi
 uvicorn[standard]
 sqlalchemy
 psycopg2-binary
+redis
 alembic
 python-dotenv
 PyJWT

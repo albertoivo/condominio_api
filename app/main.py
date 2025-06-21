@@ -4,11 +4,14 @@ from dotenv import load_dotenv
 from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
+from slowapi.errors import RateLimitExceeded
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.routers import auth, users
+
+from .middleware.rate_limit import _rate_limit_exceeded_handler, limiter
 
 load_dotenv()
 
@@ -18,6 +21,13 @@ app = FastAPI(
     title="CRUD OAuth API",
     description="API para templates de CRUD com autenticação OAuth2",
     version="1.0.0",
+    docs_url="/docs",
+    redoc_url="/redoc",
+    openapi_tags=[
+        {"name": "Auth", "description": "Operações de autenticação"},
+        {"name": "Users", "description": "Gerenciamento de usuários"},
+        {"name": "Health", "description": "Verificações de saúde"},
+    ],
 )
 
 # Incluir routers
@@ -32,7 +42,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.add_middleware(TrustedHostMiddleware, allowed_hosts=["localhost", "127.0.0.1"])
+app.add_middleware(
+    TrustedHostMiddleware, allowed_hosts=["localhost", "127.0.0.1", "testserver", "*"]
+)
+
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 
 @app.get("/", tags=["Root"])
