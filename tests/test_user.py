@@ -111,7 +111,7 @@ def test_get_user_by_id_as_admin(client: TestClient, admin_auth_headers, users_i
 
 
 def test_get_current_user_me(client: TestClient, user_auth_headers, users_in_db):
-    response = client.get("/users/me", headers=user_auth_headers)
+    response = client.get("/me", headers=user_auth_headers)
     assert response.status_code == 200
     data = response.json()
     assert data["email"] == users_in_db[1]["email"]
