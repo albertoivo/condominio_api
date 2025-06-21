@@ -67,7 +67,9 @@ def create_user(user_data: UserCreate, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.get("/search", response_model=List[User], summary="Buscar Usuários por Nome ou Email")
+@router.get(
+    "/search", response_model=List[User], summary="Buscar Usuários por Nome ou Email"
+)
 def search_users(
     query: str,
     db: Session = Depends(get_db),

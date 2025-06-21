@@ -244,11 +244,13 @@ def test_update_user_invalid_role_fails(
     assert any("role" in error["loc"] for error in errors)
 
 
-def test_search_users_by_name_as_admin(client: TestClient, admin_auth_headers, users_in_db):
+def test_search_users_by_name_as_admin(
+    client: TestClient, admin_auth_headers, users_in_db
+):
     """Testa busca de usuários por nome como admin."""
     # Busca por parte do nome do usuário comum
     response = client.get("/users/search?query=Common", headers=admin_auth_headers)
-    
+
     assert response.status_code == 200
     data = response.json()
     assert isinstance(data, list)
@@ -257,11 +259,13 @@ def test_search_users_by_name_as_admin(client: TestClient, admin_auth_headers, u
     assert any("Common" in user["nome"] for user in data)
 
 
-def test_search_users_by_email_as_admin(client: TestClient, admin_auth_headers, users_in_db):
+def test_search_users_by_email_as_admin(
+    client: TestClient, admin_auth_headers, users_in_db
+):
     """Testa busca de usuários por email como admin."""
     # Busca por parte do email do usuário admin
     response = client.get("/users/search?query=admin", headers=admin_auth_headers)
-    
+
     assert response.status_code == 200
     data = response.json()
     assert isinstance(data, list)
@@ -270,24 +274,30 @@ def test_search_users_by_email_as_admin(client: TestClient, admin_auth_headers, 
     assert any("admin" in user["email"] for user in data)
 
 
-def test_search_users_partial_match_as_admin(client: TestClient, admin_auth_headers, users_in_db):
+def test_search_users_partial_match_as_admin(
+    client: TestClient, admin_auth_headers, users_in_db
+):
     """Testa busca com correspondência parcial como admin."""
     # Busca por "user" que deve encontrar tanto "Common User" quanto "user@example.com"
     response = client.get("/users/search?query=user", headers=admin_auth_headers)
-    
+
     assert response.status_code == 200
     data = response.json()
     assert isinstance(data, list)
     assert len(data) >= 1
     # Verifica se encontrou pelo menos um usuário
-    found_users = [user for user in data if "user" in user["nome"].lower() or "user" in user["email"].lower()]
+    found_users = [
+        user
+        for user in data
+        if "user" in user["nome"].lower() or "user" in user["email"].lower()
+    ]
     assert len(found_users) >= 1
 
 
 def test_search_users_no_results_as_admin(client: TestClient, admin_auth_headers):
     """Testa busca que não retorna resultados como admin."""
     response = client.get("/users/search?query=nonexistent", headers=admin_auth_headers)
-    
+
     assert response.status_code == 200
     data = response.json()
     assert isinstance(data, list)
@@ -297,7 +307,7 @@ def test_search_users_no_results_as_admin(client: TestClient, admin_auth_headers
 def test_search_users_empty_query_as_admin(client: TestClient, admin_auth_headers):
     """Testa busca com query vazia como admin."""
     response = client.get("/users/search?query=", headers=admin_auth_headers)
-    
+
     # Dependendo da implementação, pode retornar todos os usuários ou erro de validação
     # Ajuste conforme sua implementação
     assert response.status_code in [200, 400]
@@ -306,35 +316,42 @@ def test_search_users_empty_query_as_admin(client: TestClient, admin_auth_header
 def test_search_users_as_common_user_fails(client: TestClient, user_auth_headers):
     """Testa que usuário comum não pode fazer busca de usuários."""
     response = client.get("/users/search?query=test", headers=user_auth_headers)
-    
+
     assert response.status_code == 403  # Forbidden
 
 
 def test_search_users_unauthenticated_fails(client: TestClient):
     """Testa que busca sem autenticação falha."""
     response = client.get("/users/search?query=test")
-    
+
     assert response.status_code == 403  # Ou 401, dependendo da implementação
 
 
-def test_search_users_missing_query_parameter_fails(client: TestClient, admin_auth_headers):
+def test_search_users_missing_query_parameter_fails(
+    client: TestClient, admin_auth_headers
+):
     """Testa busca sem o parâmetro query obrigatório."""
     response = client.get("/users/search", headers=admin_auth_headers)
-    
+
     assert response.status_code == 422  # Unprocessable Entity
     errors = response.json()["detail"]
     # Verifica se há erro relacionado ao parâmetro query
     assert any("query" in error["loc"] for error in errors)
 
 
-def test_search_users_case_insensitive_as_admin(client: TestClient, admin_auth_headers, users_in_db):
+def test_search_users_case_insensitive_as_admin(
+    client: TestClient, admin_auth_headers, users_in_db
+):
     """Testa se a busca é case-insensitive como admin."""
     # Busca em maiúscula por nome que está em formato normal
     response = client.get("/users/search?query=ADMIN", headers=admin_auth_headers)
-    
+
     assert response.status_code == 200
     data = response.json()
     assert isinstance(data, list)
     # Deve encontrar o usuário admin independente do case
     assert len(data) >= 1
-    assert any("admin" in user["email"].lower() or "admin" in user["nome"].lower() for user in data)
+    assert any(
+        "admin" in user["email"].lower() or "admin" in user["nome"].lower()
+        for user in data
+    )
