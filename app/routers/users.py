@@ -10,6 +10,7 @@ from app.services.user_service import UserService
 
 router = APIRouter(prefix="/users", tags=["Users"])
 
+
 @router.get("/", response_model=List[User], summary="Listar Usuários")
 def get_users(
     db: Session = Depends(get_db),

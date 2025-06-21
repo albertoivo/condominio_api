@@ -35,7 +35,9 @@ def logout(current_user: User = Depends(AuthService.get_current_user)):
     return {"detail": "Logout realizado com sucesso."}
 
 
-@router.get("/me", response_model=User, summary="Obter informações do usuário autenticado")
+@router.get(
+    "/me", response_model=User, summary="Obter informações do usuário autenticado"
+)
 def get_current_user(current_user: User = Depends(AuthService.get_current_user)):
     """
     Obtém as informações do usuário autenticado.
