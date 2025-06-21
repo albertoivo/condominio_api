@@ -26,7 +26,8 @@ app = FastAPI(
     openapi_tags=[
         {"name": "Auth", "description": "Operações de autenticação"},
         {"name": "Users", "description": "Gerenciamento de usuários"},
-        {"name": "Health", "description": "Verificações de saúde"},
+        {"name": "Home", "description": "Página inicial da API"},
+        {"name": "Health Check", "description": "Verificação de saúde da API"},
     ],
 )
 
@@ -50,8 +51,8 @@ app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 
-@app.get("/", tags=["Root"])
-def read_root():
+@app.get("/", tags=["Home"])
+def home():
     """
     Rota de boas-vindas da API.
 
