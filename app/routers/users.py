@@ -67,6 +67,30 @@ def create_user(user_data: UserCreate, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail=str(e))
 
 
+@router.get("/search", response_model=List[User], summary="Buscar Usuários por Nome ou Email")
+def search_users(
+    query: str,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(AuthService.verify_admin),
+):
+    """
+    Busca usuários pelo nome ou email.
+
+    Args:
+        query (str): Termo de busca (nome ou email)
+        db (Session): Sessão do banco de dados injetada via dependency injection
+        current_user (dict): Dados do usuário atual (injetado automaticamente)
+
+    Returns:
+        List[User]: Lista de usuários que correspondem ao termo de busca
+
+    Raises:
+        HTTPException: 400 - Se o termo de busca for inválido
+    """
+    user_service = UserService(db)
+    return user_service.search_users(query)
+
+
 @router.get("/{user_id}", response_model=User, summary="Buscar Usuário por ID")
 def get_user(user_id: int, db: Session = Depends(get_db)):
     """

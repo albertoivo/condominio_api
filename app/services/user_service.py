@@ -78,3 +78,21 @@ class UserService:
         self.db.commit()
         self.db.refresh(user)
         return user
+    
+    def search_users(self, query: str) -> List[User]:
+        """
+        Busca usuários pelo nome ou email.
+        """
+        if not query or query.strip() == "":
+            return []
+        
+        search_term = f"%{query.strip().lower()}%"
+        
+        return (
+            self.db.query(User)
+            .filter(
+                (User.nome.ilike(search_term)) | 
+                (User.email.ilike(search_term))
+            )
+            .all()
+        )
