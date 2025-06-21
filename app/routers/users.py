@@ -10,18 +10,6 @@ from app.services.user_service import UserService
 
 router = APIRouter(prefix="/users", tags=["Users"])
 
-
-@router.get("/me", response_model=User, summary="Usuário Logado")
-def logged_user(
-    db: Session = Depends(get_db),
-    current_user: dict = Depends(AuthService.get_current_user),
-):
-    """
-    Dependency to get the currently logged-in user.
-    """
-    return current_user
-
-
 @router.get("/", response_model=List[User], summary="Listar Usuários")
 def get_users(
     db: Session = Depends(get_db),

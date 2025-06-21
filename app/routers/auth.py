@@ -33,3 +33,14 @@ def logout(current_user: User = Depends(AuthService.get_current_user)):
     necessário implementar uma blocklist.
     """
     return {"detail": "Logout realizado com sucesso."}
+
+
+@router.get("/me", response_model=User, summary="Obter informações do usuário autenticado")
+def get_current_user(current_user: User = Depends(AuthService.get_current_user)):
+    """
+    Obtém as informações do usuário autenticado.
+
+    Este endpoint retorna os detalhes do usuário que está atualmente autenticado,
+    utilizando o token JWT fornecido no cabeçalho da requisição.
+    """
+    return current_user
