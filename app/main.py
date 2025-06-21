@@ -2,6 +2,8 @@ import os
 
 from dotenv import load_dotenv
 from fastapi import Depends, FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
@@ -21,6 +23,16 @@ app = FastAPI(
 # Incluir routers
 app.include_router(users.router)
 app.include_router(auth.router)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],  # Frontend URLs
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+app.add_middleware(TrustedHostMiddleware, allowed_hosts=["localhost", "127.0.0.1"])
 
 
 @app.get("/", tags=["Root"])
