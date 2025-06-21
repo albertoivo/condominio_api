@@ -355,3 +355,77 @@ def test_search_users_case_insensitive_as_admin(
         "admin" in user["email"].lower() or "admin" in user["nome"].lower()
         for user in data
     )
+
+    # Deve encontrar o usuário admin independente do case
+    assert len(data) >= 1
+    assert any(
+        "admin" in user["email"].lower() or "admin" in user["nome"].lower()
+        for user in data
+    )
+
+
+def test_count_users_as_admin(client: TestClient, admin_auth_headers, users_in_db):
+    """Testa a contagem de usuários como admin."""
+    response = client.get("/users/count", headers=admin_auth_headers)
+
+    assert response.status_code == 200
+    count = response.json()
+    assert isinstance(count, int)
+    # Deve ter pelo menos 2 usuários (admin e comum) criados pela fixture
+    assert count >= 2
+
+
+def test_count_users_as_common_user_fails(client: TestClient, user_auth_headers):
+    """Testa que usuário comum não pode acessar a contagem de usuários."""
+    response = client.get("/users/count", headers=user_auth_headers)
+
+    assert response.status_code == 403  # Forbidden
+
+
+def test_count_users_unauthenticated_fails(client: TestClient):
+    """Testa que contagem sem autenticação falha."""
+    response = client.get("/users/count")
+
+    assert response.status_code == 403  # Ou 401, dependendo da implementação
+
+
+def test_count_users_after_creating_new_user(
+    client: TestClient, admin_auth_headers, users_in_db
+):
+    """Testa se a contagem é atualizada após criar um novo usuário."""
+    # Pega a contagem inicial
+    response = client.get("/users/count", headers=admin_auth_headers)
+    initial_count = response.json()
+
+    # Cria um novo usuário
+    new_user_data = {
+        "nome": "Contador Test",
+        "email": "contador@example.com",
+        "password": "password123",
+    }
+    response = client.post("/users", json=new_user_data)
+    assert response.status_code == 201
+
+    # Verifica se a contagem aumentou
+    response = client.get("/users/count", headers=admin_auth_headers)
+    new_count = response.json()
+    assert new_count == initial_count + 1
+
+
+def test_count_users_after_deleting_user(
+    client: TestClient, admin_auth_headers, users_in_db
+):
+    """Testa se a contagem é atualizada após deletar um usuário."""
+    # Pega a contagem inicial
+    response = client.get("/users/count", headers=admin_auth_headers)
+    initial_count = response.json()
+
+    # Deleta o usuário comum
+    user_to_delete_id = users_in_db[1]["id"]
+    response = client.delete(f"/users/{user_to_delete_id}", headers=admin_auth_headers)
+    assert response.status_code == 200
+
+    # Verifica se a contagem diminuiu
+    response = client.get("/users/count", headers=admin_auth_headers)
+    new_count = response.json()
+    assert new_count == initial_count - 1

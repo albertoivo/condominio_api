@@ -93,26 +93,26 @@ def search_users(
     return user_service.search_users(query)
 
 
-@router.get("/{user_id}", response_model=User, summary="Buscar Usuário por ID")
-def get_user(user_id: int, db: Session = Depends(get_db)):
+@router.get("/count", summary="Contar Usuários")
+def count_users(
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(AuthService.verify_admin),
+):
     """
-    Busca um usuário específico pelo ID.
+    Conta o número total de usuários cadastrados.
 
     Args:
-        user_id (int): ID único do usuário
         db (Session): Sessão do banco de dados injetada via dependency injection
+        current_user (dict): Dados do usuário atual (injetado automaticamente)
 
     Returns:
-        User: Dados do usuário encontrado
+        int: Número total de usuários cadastrados
 
     Raises:
-        HTTPException: 404 - Se o usuário não for encontrado
+        HTTPException: 500 - Se ocorrer um erro interno ao contar os usuários
     """
     user_service = UserService(db)
-    user = user_service.get_user_by_id(user_id)
-    if not user:
-        raise HTTPException(status_code=404, detail="Usuário não encontrado")
-    return user
+    return user_service.count_users()
 
 
 @router.delete("/{user_id}")
@@ -167,3 +167,25 @@ def update_user(
     if not updated_user:
         raise HTTPException(status_code=404, detail="Usuário não encontrado")
     return updated_user
+
+
+@router.get("/{user_id}", response_model=User, summary="Buscar Usuário por ID")
+def get_user(user_id: int, db: Session = Depends(get_db)):
+    """
+    Busca um usuário específico pelo ID.
+
+    Args:
+        user_id (int): ID único do usuário
+        db (Session): Sessão do banco de dados injetada via dependency injection
+
+    Returns:
+        User: Dados do usuário encontrado
+
+    Raises:
+        HTTPException: 404 - Se o usuário não for encontrado
+    """
+    user_service = UserService(db)
+    user = user_service.get_user_by_id(user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="Usuário não encontrado")
+    return user

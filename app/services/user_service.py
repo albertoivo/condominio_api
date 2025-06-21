@@ -93,3 +93,9 @@ class UserService:
             .filter((User.nome.ilike(search_term)) | (User.email.ilike(search_term)))
             .all()
         )
+
+    def count_users(self) -> int:
+        """
+        Conta o número total de usuários.
+        """
+        return self.db.query(User).count()
