@@ -8,10 +8,14 @@ from slowapi.errors import RateLimitExceeded
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
+from app.config.logging import setup_logging
 from app.database import get_db
 from app.routers import auth, users
 
 from .middleware.rate_limit import _rate_limit_exceeded_handler, limiter
+
+# Ativa o sistema de logging antes de qualquer outra coisa
+logger = setup_logging()
 
 load_dotenv()
 
