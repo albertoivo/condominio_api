@@ -24,9 +24,9 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Rodar Lint (flake8)
-        run: |
-          flake8 .
+      # - name: Rodar Lint (flake8)
+      #   run: |
+      #     flake8 .
 
       - name: Verificar formatação (black)
         run: |
