@@ -1,38 +1,43 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+import logging
+
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
 
 from app.database import get_db
+from app.middleware.rate_limit import conditional_limit
 from app.schemas.auth import LoginRequest, Token
 from app.schemas.user import User
 from app.services.auth_service import AuthService
 
+logger = logging.getLogger(__name__)
 router = APIRouter(tags=["Auth"])
 
 
 @router.post("/login", response_model=Token, summary="Realizar login")
-def login(credentials: LoginRequest, db: Session = Depends(get_db)):
-    service = AuthService(db)
-    token = service.authenticate_user(credentials.email, credentials.password)
+@conditional_limit("5/minute")  # Usa rate limiting condicional
+def login(request: Request, credentials: LoginRequest, db: Session = Depends(get_db)):
+    logger.info(f"Tentativa de login para: {credentials.email}")
+
+    auth_service = AuthService(db)
+    token = auth_service.authenticate_user(credentials.email, credentials.password)
+
     if not token:
+        logger.warning(f"Login falhou para: {credentials.email}")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Credenciais inválidas"
         )
+
+    logger.info(f"Login bem-sucedido para: {credentials.email}")
     return {"access_token": token, "token_type": "bearer"}
 
 
 @router.post("/logout", summary="Realizar logout do usuário")
-def logout(current_user: User = Depends(AuthService.get_current_user)):
-    """
-    Realiza o logout do usuário.
-
-    Em uma implementação stateless com JWT, o logout é primariamente uma
-    operação do lado do cliente, que consiste em descartar o token.
-
-    Este endpoint serve como um ponto de finalização formal da sessão no lado do
-    servidor, embora não invalide o token diretamente. Para invalidar o token, seria
-    necessário implementar uma blocklist.
-    """
-    return {"detail": "Logout realizado com sucesso."}
+@conditional_limit("10/minute")  # Usa rate limiting condicional
+def logout(
+    request: Request, current_user: User = Depends(AuthService.get_current_user)
+):
+    logger.info(f"Logout realizado para usuário: {current_user.email}")
+    return {"message": "Logout realizado com sucesso."}
 
 
 @router.get(

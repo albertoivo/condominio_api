@@ -1,5 +1,10 @@
+import os
 import sys
 from pathlib import Path
+
+# PRIMEIRA COISA: Definir ambiente de teste
+os.environ["TESTING"] = "True"
+os.environ["LOG_LEVEL"] = "ERROR"
 
 # Adicionar o diretório raiz ao Python path ANTES dos imports
 root_dir = Path(__file__).parent.parent

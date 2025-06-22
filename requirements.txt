@@ -12,6 +12,7 @@ flake8
 autoflake8
 pytest
 pytest-asyncio
+pytest-env
 httpx
 isort
 bcrypt
