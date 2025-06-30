@@ -1,4 +1,4 @@
-name: FastAPI CI
+name: FastAPI CI & Test
 
 on:
   push:
@@ -6,33 +6,62 @@ on:
   pull_request:
     branches: [ main ]
 
+# Otimização: Cancela execuções antigas na mesma PR para economizar recursos
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
 jobs:
-  build:
+  # Nome do job mais descritivo
+  test-and-lint:
     runs-on: ubuntu-latest
+    
+    # Otimização: Testa em múltiplas versões do Python para garantir compatibilidade
+    strategy:
+      matrix:
+        python-version: ['3.9', '3.10', '3.11']
 
     steps:
       - name: Checkout do código
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4 # Otimização: Usar a versão mais recente
 
-      - name: Configurar Python
-        uses: actions/setup-python@v4
+      - name: Configurar Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5 # Otimização: Usar a versão mais recente
         with:
-          python-version: '3.10'
+          python-version: ${{ matrix.python-version }}
+
+      # Otimização: Cache de dependências para acelerar instalações futuras
+      - name: Cache de dependências Pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
 
       - name: Instalar dependências
         run: |
           python -m pip install --upgrade pip
+          # Boa prática: Instalar pytest e linters de um arquivo de dev/test
+          pip install pytest flake8 black
           pip install -r requirements.txt
 
-      # - name: Rodar Lint (flake8)
-      #   run: |
-      #     flake8 .
+      # Boa prática: Reativar linters para garantir a qualidade do código
+      - name: Rodar Lint (Flake8)
+        run: |
+          # --count mostra o número de erros; --select ignora alguns erros; --max-complexity e --max-line-length são boas práticas
+          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+          flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
 
-      - name: Verificar formatação (black)
+      - name: Verificar formatação (Black)
         run: |
           black --check .
 
-      - name: Rodar testes (pytest)
+      - name: Rodar testes (Pytest)
+        # Boa prática: Adicionar variáveis de ambiente se os testes precisarem
+        env:
+          # Exemplo: DATABASE_URL: ${{ secrets.TEST_DATABASE_URL }}
+          # OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: |
-          cd ${{ github.workspace }}
-          python -m pytest tests/ -v
+          # O `cd` não é necessário, o workspace já é o padrão
+          pytest tests/ -v
